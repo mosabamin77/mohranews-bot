@@ -1,9 +1,11 @@
-import asyncio
 import feedparser
+import os
+import json
+import asyncio
 from telegram import Bot
 from telegram.request import HTTPXRequest
 
-TOKEN = "8790836662:AAHEwBKNtK_t_TJ6Er9Qc0Pr7DkyNd4RO1Q"
+TOKEN = os.getenv("8790836662:AAHEwBKNtK_t_TJ6Er9Qc0Pr7DkyNd4RO1Q")
 CHANNEL_ID = "@muhranews"
 RSS_FEED = "https://muhraplatform.com/feed"
 
@@ -12,41 +14,40 @@ request = HTTPXRequest(
     read_timeout=30
 )
 
-bot = Bot(
-    token=TOKEN,
-    request=request
-)
+bot = Bot(token=TOKEN, request=request)
 
-posted_links = set()
+FILE_NAME = "posted.json"
+
+if os.path.exists(FILE_NAME):
+    with open(FILE_NAME, "r") as f:
+        posted_links = set(json.load(f))
+else:
+    posted_links = set()
 
 async def send_news():
-    while True:
-        try:
-            feed = feedparser.parse(RSS_FEED)
 
-            for entry in feed.entries:
+    feed = feedparser.parse(RSS_FEED)
 
-                if entry.link not in posted_links:
+    for entry in feed.entries:
 
-                    message = f"""
+        if entry.link not in posted_links:
+
+            message = f"""
 📰 {entry.title}
 
 {entry.link}
 """
 
-                    await bot.send_message(
-                        chat_id=CHANNEL_ID,
-                        text=message
-                    )
+            await bot.send_message(
+                chat_id=CHANNEL_ID,
+                text=message
+            )
 
-                    print("Posted:", entry.title)
+            print("Posted:", entry.title)
 
-                    posted_links.add(entry.link)
+            posted_links.add(entry.link)
 
-            await asyncio.sleep(60)
-
-        except Exception as e:
-            print("Error:", e)
-            await asyncio.sleep(10)
+    with open(FILE_NAME, "w") as f:
+        json.dump(list(posted_links), f)
 
 asyncio.run(send_news())
