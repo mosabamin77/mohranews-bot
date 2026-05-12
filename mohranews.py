@@ -2,9 +2,8 @@ import asyncio
 import feedparser
 from telegram import Bot
 from telegram.request import HTTPXRequest
-import os
 
-TOKEN = os.getenv("BOT_TOKEN")
+TOKEN = "8790836662:AAHEwBKNtK_t_TJ6Er9Qc0Pr7DkyNd4RO1Q"
 CHANNEL_ID = "@muhranews"
 RSS_FEED = "https://muhraplatform.com/feed"
 
