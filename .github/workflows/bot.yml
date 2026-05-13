@@ -1,28 +1,34 @@
-name: Telegram News Bot
+name: github actions bot
 
 on:
   schedule:
     - cron: "*/5 * * * *"
-
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - uses: actions/setup-python@v4
         with:
           python-version: "3.11"
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
+      - run: pip install -r requirements.txt
 
-      - name: Run bot
+      - run: python mohranews.py
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-        run: python mohranews.py
+
+      - name: Save posted links
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add posted.json
+          git commit -m "update posted links" || echo "No changes"
+          git push
